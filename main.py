@@ -23,7 +23,10 @@ def main():
                 pygame.quit()
                 sys.exit()
         
-        
+        for x in range(9, 30):
+            pygame.draw.rect(window, (111,84,76), pygame.Rect(getcoords(x, 20)[0], getcoords(x, 20)[1], TILE_SIZE, TILE_SIZE))
+            pygame.draw.rect(window, (69,124,96), pygame.Rect(getcoords(x, 19)[0], getcoords(x, 19)[1], TILE_SIZE, TILE_SIZE))
+
         pygame.display.flip()
         window.fill((100, 100, 200))
         clock.tick(FPS)
