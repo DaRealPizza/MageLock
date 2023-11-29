@@ -34,16 +34,50 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, cls, posx, posy):
         pygame.sprite.Sprite.__init__(self)
         self.image = classes[cls]
+        self.imageleft = self.image
+        self.imageright = pygame.transform.flip(self.image, True, False)
         self.x = posx
         self.y = posy
 
-        self.rect = self.image.get_rect()
+        self.gravity = 2
+        self.speed = 15
+        self.jumpvel = 40
+
+        self.isgrounded = False
+
+        self.xvel = 0
+        self.yvel = 0
 
     def draw(self):
         window.blit(self.image, (getcoords(self.x, self.y)))
 
     def update(self):
-        pass
+        self.rect = pygame.Rect(getcoords(self.x, self.y)[0], getcoords(self.x, self.y)[1], TILE_SIZE, TILE_SIZE)
+
+        self.yvel += self.gravity
+        if self.rect.colliderect(stage_hitbox):
+            self.yvel = 0
+            self.isgrounded = True
+
+        self.inputhandler()
+
+        self.y += self.yvel / 100
+        self.x += self.xvel / 100
+
+        self.xvel = 0
+
+    def inputhandler(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            self.xvel += -self.speed
+            self.image = self.imageleft
+        if keys[pygame.K_RIGHT]:
+            self.xvel += self.speed
+            self.image = self.imageright
+
+        if keys[pygame.K_UP] and self.isgrounded is True: 
+            self.yvel -= self.jumpvel
+            self.isgrounded = False
 
 # creating player (temp)
 plr = Player("mage", 10, 7)
@@ -66,8 +100,6 @@ def main():
             pygame.draw.rect(window, (111,84,76), pygame.Rect(getcoords(x, 12)[0], getcoords(x, 12)[1], TILE_SIZE, TILE_SIZE))
             pygame.draw.rect(window, (69,124,96), pygame.Rect(getcoords(x, 11)[0], getcoords(x, 11)[1], TILE_SIZE, TILE_SIZE))
 
-        pygame.draw.rect(window, (255,0,0), stage_hitbox)
-
         # drawing sprites
         plr.draw()
 
@@ -75,6 +107,8 @@ def main():
         pygame.display.flip()
         window.fill((100, 100, 200))
         clock.tick(FPS)
+
+        print(clock.get_fps())
 
 
 if __name__ == "__main__":
