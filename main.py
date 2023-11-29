@@ -22,6 +22,10 @@ def getcoords(x, y):
 # mutable variables
 stage_hitbox = pygame.Rect(getcoords(2, 11)[0], getcoords(2, 11)[1], TILE_SIZE * 16, TILE_SIZE * 2)
 
+hitboxes = [stage_hitbox]
+
+showhitboxes = False
+
 mage = pygame.image.load("assets/characters/mage.png").convert_alpha()
 mage = pygame.transform.scale(mage, (TILE_SIZE * 1, TILE_SIZE * 1))
 
@@ -50,16 +54,28 @@ class Player(pygame.sprite.Sprite):
 
     def draw(self):
         window.blit(self.image, (getcoords(self.x, self.y)))
+        if showhitboxes:
+            pygame.draw.rect(window, (0,255,0), self.rect)
+            pygame.draw.rect(window, (255,0,0), self.groundrect)
 
     def update(self):
-        self.rect = pygame.Rect(getcoords(self.x, self.y)[0], getcoords(self.x, self.y)[1], TILE_SIZE, TILE_SIZE)
+        self.rect = pygame.Rect(getcoords(self.x, self.y)[0], getcoords(self.x, self.y)[1], TILE_SIZE, TILE_SIZE - 6)
+        self.groundrect = pygame.Rect(getcoords(self.x, self.y)[0] + 7.5, getcoords(self.x, self.y)[1] + TILE_SIZE - TILE_SIZE/5, TILE_SIZE - 15, TILE_SIZE - 30)
+
 
         self.yvel += self.gravity
-        if self.rect.colliderect(stage_hitbox):
-            self.yvel = 0
-            self.isgrounded = True
+        for i in hitboxes:
+            if self.groundrect.colliderect(i):
+                self.yvel = 0
+                self.isgrounded = True
+            else:
+                self.isgrounded = False
 
         self.inputhandler()
+
+        for i in hitboxes:
+            if self.rect.colliderect(stage_hitbox):
+                self.xvel = 0
 
         self.y += self.yvel / 100
         self.x += self.xvel / 100
@@ -92,6 +108,11 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_F12:
+                    global showhitboxes
+                    showhitboxes = not showhitboxes
         
         plr.update()
         
@@ -100,6 +121,10 @@ def main():
             pygame.draw.rect(window, (111,84,76), pygame.Rect(getcoords(x, 12)[0], getcoords(x, 12)[1], TILE_SIZE, TILE_SIZE))
             pygame.draw.rect(window, (69,124,96), pygame.Rect(getcoords(x, 11)[0], getcoords(x, 11)[1], TILE_SIZE, TILE_SIZE))
 
+        if showhitboxes:
+            for i in hitboxes:
+                pygame.draw.rect(window, (0,0,255), i)
+
         # drawing sprites
         plr.draw()
 
@@ -107,8 +132,6 @@ def main():
         pygame.display.flip()
         window.fill((100, 100, 200))
         clock.tick(FPS)
-
-        print(clock.get_fps())
 
 
 if __name__ == "__main__":
