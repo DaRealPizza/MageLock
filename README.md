@@ -1,0 +1,98 @@
+~~ Magelock ~~
+
+
+Introduction:
+
+  - Magelock is a 2-4 player movement based fighting game. Each player will pick a different type of magic user / class which determines their moveset. Players will fight it out with one player leaving victorious. Players will have basic slashes as well as class specific abilities and specials.
+
+  Presentation:
+    - Airborne stage with dynamic camera
+    - Bottom of screen taken up by health bar(s) and timer
+
+  Software of choice:
+    - Engine: Pygame
+    - Art: Aseprite, dotpict, paint.net
+    - Audio: FL Studio 20, sfxr, Bosca Ceoil
+
+  Genre(s):
+    - Multiplayer, 2D Platformer, Fighting
+
+  Platform:
+    - Itch.io
+    - Windows & Linux
+
+
+Player:
+
+  Movement:
+    - Run with <>
+    - Jump with ^ or Space
+    - Crouch with v
+
+  Health:
+    - 100 HP (all classes)
+
+  (C) Basic attack types (same for all classes):
+    - Forward
+    - Down
+    - Up
+    - Aerial Down
+
+  (X) Special attack types (differ per class):
+    - Neutral
+    - Forward
+    - Down
+    - Up
+    - Aerial Down
+
+  (Z) Class ability:
+    - Recharges with time / damage dealt
+  
+  (LSHIFT) Dash:
+    - Standard range across all classes
+
+  Classes:
+    - Mage (Pyromancer / DPS)
+    - Warlock (Debuffs / Stacks)
+    - Druid (Survivability / Buffs)
+    - Necromancer (Summoning / Control)
+
+
+  Minimum viable player (MVP):
+    - Movement
+    - Dashing
+    - Basic attacks
+    - One class (Mage)
+
+
+Game Loop:
+
+  Maps:
+    - One map to start with, will change later
+
+  Win condition:
+    - Best of 3, round ends when one player dies
+    - If the time runs out, player with more health wins
+
+  Camera:
+    - Camera dynamically moves to fit both players on screen at once, smash style
+
+  - Music, sfx, gfx to be determined
+
+
+Server Architecture:
+
+  - TCP (Temporary decision / might switch to UDP)
+  - Objects shared between client -> server, server distributes the player objects among players
+  - Server stores ongoing game data such as current map, time remaining, etc
+  - Server does client-side calculations to prevent tampering / cheating
+
+
+
+
+
+
+
+
+
+
