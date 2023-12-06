@@ -3,11 +3,7 @@ import pygame, sys
 # constants
 WINDOW_SIZE = (800, 600)
 FPS = 60
-
-# - grid is 40 by 30
 TILE_SIZE = 40
-GRID_X = WINDOW_SIZE[0] / 20
-GRID_Y = WINDOW_SIZE[1] / 15
 
 # pygame initialization
 pygame.init()
@@ -15,25 +11,17 @@ window = pygame.display.set_mode(WINDOW_SIZE)
 pygame.display.set_caption("Magelock")
 clock = pygame.time.Clock()
 
-# world coords to screen coords
-def getcoords(x, y):
-    return x * GRID_X, y * GRID_Y
-
-# screen coords to world coords
-def getworldcoords(x, y):
-    return x / GRID_X, y / GRID_Y
-
 # mutable variables
-stage_hitbox = pygame.Rect(getcoords(2, 11)[0], getcoords(2, 11)[1], TILE_SIZE * 16, TILE_SIZE * 2)
+stage_hitbox = pygame.Rect(80, 440, TILE_SIZE * 16, TILE_SIZE * 2)
 
-hitboxes = [stage_hitbox,pygame.Rect(getcoords(2, 7)[0], getcoords(2, 7)[1], TILE_SIZE * 4, TILE_SIZE),pygame.Rect(getcoords(15, 10)[0], getcoords(15, 10)[1], TILE_SIZE * 4, TILE_SIZE)]
+hitboxes = [stage_hitbox,pygame.Rect(80, 280, TILE_SIZE * 4, TILE_SIZE),pygame.Rect(600, 400, TILE_SIZE * 4, TILE_SIZE)]
 
-showhitboxes = False
-
+# images
 mage = pygame.image.load("assets/characters/mage.png").convert_alpha()
 mage = pygame.transform.scale(mage, (TILE_SIZE * 1, TILE_SIZE * 1))
 
-classes = {
+# class image dict
+classimg = {
     "mage" : mage
 }
 
@@ -41,35 +29,32 @@ classes = {
 class Player(pygame.sprite.Sprite):
     def __init__(self, cls, posx, posy):
         pygame.sprite.Sprite.__init__(self)
-        self.image = classes[cls]
+        #fetches image from class dict
+        self.image = classimg[cls]
         self.imageleft = self.image
         self.imageright = pygame.transform.flip(self.image, True, False)
-        self.tempx = 0
 
-        self.rect = pygame.Rect(getcoords(posx, posy)[0], getcoords(posx, posy)[1], TILE_SIZE, TILE_SIZE)
+        # hitbox rect
+        self.rect = pygame.Rect(posx, posy, TILE_SIZE, TILE_SIZE)
 
-        self.gravity = 2
-        self.speed = 15
-        self.jumpvel = 45
-
-        self.isgrounded = False
-
+        # physics variables
+        self.gravity = 1
+        self.speed = 7
+        self.jumpvel = 20
         self.yvel = 0
         self.xvel = 0
+        self.isgrounded = False
 
-    # draws player
-    def draw(self):
-        window.blit(self.image, (self.rect.x, self.rect.y))
-        if showhitboxes:
-            pygame.draw.rect(window, (0,255,0), self.rect)
 
     def update(self):
         # checks for input and puts it in a list
         intent = self.inputhandler()
 
-        self.xvel = getcoords(intent[0] * self.speed / 100,0)[0]
+        # moves player horizontally
+        self.xvel = intent[0] * self.speed
         self.rect.x += self.xvel
 
+        # checks for horizontal collision
         for i in hitboxes:
             if self.rect.colliderect(i):
                 if self.xvel > 0:
@@ -77,12 +62,14 @@ class Player(pygame.sprite.Sprite):
                 if self.xvel < 0:
                     self.rect.left = i.right
 
-        self.yvel += self.gravity / 100
+        # moves player vertically
+        self.yvel += self.gravity
         if intent[1] == 1:
-            self.yvel -= self.jumpvel / 100
+            self.yvel -= self.jumpvel
             self.isgrounded = False
-        self.rect.y += getcoords(0,self.yvel)[1]
+        self.rect.y += self.yvel
 
+        # checks for vertical collision
         for i in hitboxes:
             if self.rect.colliderect(i):
                 if self.yvel > 0:
@@ -93,10 +80,15 @@ class Player(pygame.sprite.Sprite):
                     self.rect.top = i.bottom
                     self.yvel = 0
 
-        self.draw() 
+        # makes sure player cant jump when you fall off a platform
+        if self.yvel > 0:
+            self.isgrounded = False
+
+        # draws player
+        window.blit(self.image, (self.rect.x, self.rect.y))
             
 
-
+    # checks for input
     def inputhandler(self):
         intent = [0,0]
         keys = pygame.key.get_pressed()
@@ -113,7 +105,7 @@ class Player(pygame.sprite.Sprite):
     
 
 # creating player (temp)
-plr = Player("mage", 10, 7)
+plr = Player("mage", 380, 280)
 
 
 # main function
@@ -126,22 +118,11 @@ def main():
                 pygame.quit()
                 sys.exit()
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_F12:
-                    global showhitboxes
-                    showhitboxes = not showhitboxes
-        
-        
-        
-        # drawing stage (temp)
-        for x in range(2, 18):
-            pygame.draw.rect(window, (111,84,76), pygame.Rect(getcoords(x, 12)[0], getcoords(x, 12)[1], TILE_SIZE, TILE_SIZE))
-            pygame.draw.rect(window, (69,124,96), pygame.Rect(getcoords(x, 11)[0], getcoords(x, 11)[1], TILE_SIZE, TILE_SIZE))
+        # draws stage (temp)
+        for i in hitboxes:
+            pygame.draw.rect(window, (0,0,255), i)
 
-        if showhitboxes:
-            for i in hitboxes:
-                pygame.draw.rect(window, (0,0,255), i)
-
+        # updates player
         plr.update()
 
         # pygame updates
