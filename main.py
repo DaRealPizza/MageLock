@@ -50,7 +50,7 @@ class Player(pygame.sprite.Sprite):
 
         self.gravity = 2
         self.speed = 15
-        self.jumpvel = 40
+        self.jumpvel = 45
 
         self.isgrounded = False
 
@@ -67,53 +67,33 @@ class Player(pygame.sprite.Sprite):
         # checks for input and puts it in a list
         intent = self.inputhandler()
 
-        # checks if we can move the player horizontally
+        self.xvel = getcoords(intent[0] * self.speed / 100,0)[0]
+        self.rect.x += self.xvel
+
+        for i in hitboxes:
+            if self.rect.colliderect(i):
+                if self.xvel > 0:
+                    self.rect.right = i.left
+                if self.xvel < 0:
+                    self.rect.left = i.right
+
         self.yvel += self.gravity / 100
-
-        collideh = self.horizontal_collision(intent)
-
-        #check vertical collision
-        self.vertical_collision()
-
         if intent[1] == 1:
             self.yvel -= self.jumpvel / 100
             self.isgrounded = False
-        
-
         self.rect.y += getcoords(0,self.yvel)[1]
-        if collideh:
-            self.rect.x += getcoords(self.xvel,0)[0]
 
-        self.xvel = 0
-    
-    def vertical_collision(self):
         for i in hitboxes:
             if self.rect.colliderect(i):
                 if self.yvel > 0:
-                    self.rect.bottom = i.top + 2
+                    self.rect.bottom = i.top
+                    self.yvel = 0
                     self.isgrounded = True
                 if self.yvel < 0:
                     self.rect.top = i.bottom
-                
-                self.yvel = 0
+                    self.yvel = 0
 
-    def horizontal_collision(self, intent):
-        if intent[0] == -1:
-            self.xvel = -self.speed / 100
-        if intent[0] == 1:
-            self.xvel = self.speed / 100
-
-        self.rect.x += getcoords(self.xvel,0)[0]
-        for i in hitboxes:
-            if self.rect.colliderect(i):
-                self.rect.x -= getcoords(self.xvel,0)[0]
-                self.xvel = 0
-                return False
-            
-        self.rect.x -= getcoords(self.xvel,0)[0]
-        self.xvel = 0
-        return True
-        
+        self.draw() 
             
 
 
@@ -151,7 +131,7 @@ def main():
                     global showhitboxes
                     showhitboxes = not showhitboxes
         
-        plr.update()
+        
         
         # drawing stage (temp)
         for x in range(2, 18):
@@ -162,8 +142,7 @@ def main():
             for i in hitboxes:
                 pygame.draw.rect(window, (0,0,255), i)
 
-        # drawing sprites
-        plr.draw()
+        plr.update()
 
         # pygame updates
         pygame.display.flip()
