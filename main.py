@@ -12,8 +12,9 @@ pygame.display.set_caption("Magelock")
 clock = pygame.time.Clock()
 
 # mutable variables
-ip = "127.0.0.1"
+serverip = "127.0.0.1"
 serverport = 40183
+clientip = "127.0.0.1"
 clientport = random.randint(10000, 65500)
 
 enemies = []
@@ -116,6 +117,14 @@ class Packet:
         self.cls = cls
         self.address = address
 
+def drawEnemy(enemy):
+    image = classimg[enemy.cls]
+    x = enemy.x
+    y = enemy.y
+
+    window.blit(image, (x, y))
+
+
 
 # creating player (temp)
 plr = Player("mage", 380, 280)
@@ -123,15 +132,15 @@ plr = Player("mage", 380, 280)
 
 # joining server
 con = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-con.bind((ip, clientport))
+con.bind((clientip, clientport))
 
-con.sendto(pickle.dumps("HEADER:JOIN"), (ip, serverport))
+con.sendto(pickle.dumps("HEADER:JOIN"), (serverip, serverport))
 
-con.sendto(pickle.dumps("HEADER:FETCHROOM"), (ip, serverport))
+con.sendto(pickle.dumps("HEADER:FETCHROOM"), (serverip, serverport))
 try:
     data, addr = con.recvfrom(1024)
 except:
-    print(f"failed to connect to {ip}:{serverport}")
+    print(f"failed to connect to {serverip}:{serverport}")
     sys.exit()
 
 room = pickle.loads(data)
@@ -145,7 +154,7 @@ def main():
         # global events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                con.sendto(pickle.dumps("HEADER:LEAVE"), (ip, serverport))
+                con.sendto(pickle.dumps("HEADER:LEAVE"), (serverip, serverport))
                 con.close()
                 pygame.quit()
                 sys.exit()
@@ -158,14 +167,16 @@ def main():
         plr.update()
 
         # sends player to server
-        pack = Packet(plr.rect.x, plr.rect.y, "mage", (ip, clientport))
-        con.sendto(pickle.dumps(pack), (ip, serverport))
+        pack = Packet(plr.rect.x, plr.rect.y, "mage", (clientip, clientport))
+        con.sendto(pickle.dumps(pack), (serverip, serverport))
 
         data, addr = con.recvfrom(1024)
         enemies = pickle.loads(data)
 
         for i in enemies:
-            print(i.address)
+            if i.address == (clientip, clientport):
+                continue
+            drawEnemy(i)
 
         # pygame updates
         pygame.display.flip()
