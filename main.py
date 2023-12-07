@@ -16,6 +16,8 @@ ip = "127.0.0.1"
 serverport = 40183
 clientport = random.randint(10000, 65500)
 
+enemies = []
+
 stage_hitbox = pygame.Rect(80, 440, TILE_SIZE * 16, TILE_SIZE * 2)
 
 hitboxes = [stage_hitbox,pygame.Rect(80, 280, TILE_SIZE * 4, TILE_SIZE),pygame.Rect(600, 400, TILE_SIZE * 4, TILE_SIZE)]
@@ -107,6 +109,13 @@ class Player(pygame.sprite.Sprite):
 
         return intent
     
+class Packet:
+    def __init__(self, x, y, cls, address):
+        self.x = x
+        self.y = y
+        self.cls = cls
+        self.address = address
+
 
 # creating player (temp)
 plr = Player("mage", 380, 280)
@@ -116,9 +125,9 @@ plr = Player("mage", 380, 280)
 con = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 con.bind((ip, clientport))
 
-con.sendto("HEADER:JOIN".encode(), (ip, serverport))
+con.sendto(pickle.dumps("HEADER:JOIN"), (ip, serverport))
 
-con.sendto("HEADER:FETCHROOM".encode(), (ip, serverport))
+con.sendto(pickle.dumps("HEADER:FETCHROOM"), (ip, serverport))
 try:
     data, addr = con.recvfrom(1024)
 except:
@@ -131,11 +140,12 @@ print(room)
 # main function
 def main():
     while True:
+        global enemies
 
         # global events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                con.sendto("HEADER:LEAVE".encode(), (ip, serverport))
+                con.sendto(pickle.dumps("HEADER:LEAVE"), (ip, serverport))
                 con.close()
                 pygame.quit()
                 sys.exit()
@@ -146,6 +156,16 @@ def main():
 
         # updates player
         plr.update()
+
+        # sends player to server
+        pack = Packet(plr.rect.x, plr.rect.y, "mage", (ip, clientport))
+        con.sendto(pickle.dumps(pack), (ip, serverport))
+
+        data, addr = con.recvfrom(1024)
+        enemies = pickle.loads(data)
+
+        for i in enemies:
+            print(i.address)
 
         # pygame updates
         pygame.display.flip()
