@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, socket, random, pickle
 
 # constants
 WINDOW_SIZE = (800, 600)
@@ -12,6 +12,10 @@ pygame.display.set_caption("Magelock")
 clock = pygame.time.Clock()
 
 # mutable variables
+ip = "127.0.0.1"
+serverport = 40183
+clientport = random.randint(10000, 65500)
+
 stage_hitbox = pygame.Rect(80, 440, TILE_SIZE * 16, TILE_SIZE * 2)
 
 hitboxes = [stage_hitbox,pygame.Rect(80, 280, TILE_SIZE * 4, TILE_SIZE),pygame.Rect(600, 400, TILE_SIZE * 4, TILE_SIZE)]
@@ -108,6 +112,22 @@ class Player(pygame.sprite.Sprite):
 plr = Player("mage", 380, 280)
 
 
+# joining server
+con = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+con.bind((ip, clientport))
+
+con.sendto("HEADER:JOIN".encode(), (ip, serverport))
+
+con.sendto("HEADER:FETCHROOM".encode(), (ip, serverport))
+try:
+    data, addr = con.recvfrom(1024)
+except:
+    print(f"failed to connect to {ip}:{serverport}")
+    sys.exit()
+
+room = pickle.loads(data)
+print(room)
+
 # main function
 def main():
     while True:
@@ -115,6 +135,8 @@ def main():
         # global events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                con.sendto("HEADER:LEAVE".encode(), (ip, serverport))
+                con.close()
                 pygame.quit()
                 sys.exit()
 
