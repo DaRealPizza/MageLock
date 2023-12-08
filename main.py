@@ -138,7 +138,6 @@ plr = Player("mage", 380, 280)
 
 # joining server
 con = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-con.bind((clientip, clientport))
 
 con.sendto(pickle.dumps("HEADER:JOIN"), (serverip, serverport))
 

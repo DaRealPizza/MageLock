@@ -1,6 +1,6 @@
 import socket, pickle
 
-ip = "127.0.0.1"
+ip = "0.0.0.0"
 port = 40183
 
 # connect to server
@@ -45,9 +45,8 @@ while True:
     if isinstance(data, Packet):
         # updates room based on player packet
         room[addr] = data
-        
+
         # responds with enemy data
         enemies = list(room.values())
         con.sendto(pickle.dumps(enemies), addr)
-        
     
