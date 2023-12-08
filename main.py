@@ -91,6 +91,11 @@ class Player(pygame.sprite.Sprite):
         if self.yvel > 0:
             self.isgrounded = False
 
+        if self.rect.y > WINDOW_SIZE[1] + 100:
+            self.rect.x, self.rect.y = 380, 280
+            self.xvel = 0
+            self.yvel = 0
+
         # draws player
         window.blit(self.image, (self.rect.x, self.rect.y))
             
@@ -145,6 +150,7 @@ except:
     print(f"failed to connect to {serverip}:{serverport}")
     sys.exit()
 
+# leave the server when game crashes
 def crashhandler(type, value, tb):
     con.sendto(pickle.dumps("HEADER:CRASH"), (serverip, serverport))
     con.close()
@@ -175,9 +181,11 @@ def main():
         pack = Packet(plr.rect.x, plr.rect.y, "mage", (clientip, clientport))
         con.sendto(pickle.dumps(pack), (serverip, serverport))
 
+        # receives other players' packets
         data, addr = con.recvfrom(1024)
         enemies = pickle.loads(data)
 
+        # draw enemies received from server
         for i in enemies:
             if i.address == (clientip, clientport):
                 continue
