@@ -30,6 +30,9 @@ while True:
                 print(f"{addr} left room")
             elif header == "FETCHROOM":
                 con.sendto(pickle.dumps(room), addr)
+            elif header == "CRASH":
+                del room[addr]
+                print(f"{addr} crashed")
             else:
                 print(f"{addr} sends invalid header: {header}")
     if isinstance(data, Packet):

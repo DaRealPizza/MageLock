@@ -104,12 +104,13 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_RIGHT]:
             intent[0] = 1
 
-        if keys[pygame.K_UP] and self.isgrounded is True: 
+        if keys[pygame.K_UP] and self.isgrounded: 
             self.isgrounded = False
             intent[1] = 1
 
         return intent
-    
+
+# class for player packets
 class Packet:
     def __init__(self, x, y, cls, address):
         self.x = x
@@ -117,13 +118,13 @@ class Packet:
         self.cls = cls
         self.address = address
 
+# draws the enemies received from server
 def drawEnemy(enemy):
     image = classimg[enemy.cls]
     x = enemy.x
     y = enemy.y
 
     window.blit(image, (x, y))
-
 
 
 # creating player (temp)
@@ -136,6 +137,7 @@ con.bind((clientip, clientport))
 
 con.sendto(pickle.dumps("HEADER:JOIN"), (serverip, serverport))
 
+# fetches room to check connection
 con.sendto(pickle.dumps("HEADER:FETCHROOM"), (serverip, serverport))
 try:
     data, addr = con.recvfrom(1024)
@@ -143,8 +145,11 @@ except:
     print(f"failed to connect to {serverip}:{serverport}")
     sys.exit()
 
-room = pickle.loads(data)
-print(room)
+def crashhandler(type, value, tb):
+    con.sendto(pickle.dumps("HEADER:CRASH"), (serverip, serverport))
+    con.close()
+
+sys.excepthook = crashhandler
 
 # main function
 def main():
