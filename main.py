@@ -5,6 +5,11 @@ WINDOW_SIZE = (800, 600)
 FPS = 60
 TILE_SIZE = 40
 
+serverip = input("Server ip: ")
+serverport = 40183
+clientip = socket.gethostbyname(socket.gethostname())
+clientport = random.randint(10000, 65500)
+
 # pygame initialization
 pygame.init()
 window = pygame.display.set_mode(WINDOW_SIZE)
@@ -12,11 +17,6 @@ pygame.display.set_caption("Magelock")
 clock = pygame.time.Clock()
 
 # mutable variables
-serverip = "127.0.0.1"
-serverport = 40183
-clientip = "127.0.0.1"
-clientport = random.randint(10000, 65500)
-
 enemies = []
 
 stage_hitbox = pygame.Rect(80, 440, TILE_SIZE * 16, TILE_SIZE * 2)
@@ -172,7 +172,7 @@ def main():
 
         # draws stage (temp)
         for i in hitboxes:
-            pygame.draw.rect(window, (0,0,255), i)
+            pygame.draw.rect(window, (69, 124, 96), i)
 
         # updates player
         plr.update()
@@ -193,7 +193,7 @@ def main():
 
         # pygame updates
         pygame.display.flip()
-        window.fill((100, 100, 200))
+        window.fill((133, 167, 182))
         clock.tick(FPS)
 
 
