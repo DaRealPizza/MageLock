@@ -40,6 +40,7 @@ class Player(pygame.sprite.Sprite):
         self.image = classimg[cls]
         self.imageleft = self.image
         self.imageright = pygame.transform.flip(self.image, True, False)
+        self.animationstate = "left"
 
         # hitbox rect
         self.rect = pygame.Rect(posx, posy, TILE_SIZE, TILE_SIZE)
@@ -97,7 +98,15 @@ class Player(pygame.sprite.Sprite):
             self.yvel = 0
 
         # draws player
+        if intent[0] > 0:
+            self.image = self.imageright
+            self.animationstate = "right"
+        if intent[0] < 0:
+            self.image = self.imageleft
+            self.animationstate = "left"
+
         window.blit(self.image, (self.rect.x, self.rect.y))
+        
             
 
     # checks for input
@@ -117,17 +126,24 @@ class Player(pygame.sprite.Sprite):
 
 # class for player packets
 class Packet:
-    def __init__(self, x, y, cls, address):
+    def __init__(self, x, y, cls, address, animationstate):
         self.x = x
         self.y = y
         self.cls = cls
         self.address = address
+        self.animationstate = animationstate
 
 # draws the enemies received from server
 def drawEnemy(enemy):
     image = classimg[enemy.cls]
     x = enemy.x
     y = enemy.y
+    imageleft = image
+    imageright = pygame.transform.flip(image, True, False)
+    if enemy.animationstate == "left":
+        image = imageleft
+    if enemy.animationstate == "right":
+        image = imageright
 
     window.blit(image, (x, y))
 
@@ -177,7 +193,7 @@ def main():
         plr.update()
 
         # sends player to server
-        pack = Packet(plr.rect.x, plr.rect.y, "mage", (clientip, clientport))
+        pack = Packet(plr.rect.x, plr.rect.y, "mage", (clientip, clientport), plr.animationstate)
         con.sendto(pickle.dumps(pack), (serverip, serverport))
 
         # receives other players' packets

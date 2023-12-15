@@ -11,11 +11,12 @@ room = {}
 
 # define player sent packet
 class Packet:
-    def __init__(self, x, y, cls, address):
+    def __init__(self, x, y, cls, address, animationstate):
         self.x = x
         self.y = y
         self.cls = cls
         self.address = address
+        self.animationstate = animationstate
 
 # main loop
 while True:
